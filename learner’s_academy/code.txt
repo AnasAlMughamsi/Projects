@@ -1,0 +1,210 @@
+package AdminServlet;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.util.List;
+import java.util.Properties;
+
+import javax.annotation.Resource;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+
+import models.Class;
+import models.Student;
+import models.teacher;
+import models.Subject;
+
+
+
+@WebServlet("/AdminController")
+
+public class Admin extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+	private Database database;
+
+	@Resource(name = "jdbc_database")
+	private DataSource datasource;
+
+
+	
+	@Override
+	public void init() throws ServletException {
+
+		super.init();
+
+		// create instance of db util, to pass in conn pool object
+		try {
+			database = new Database(datasource);
+
+		} catch (Exception e) {
+			throw new ServletException(e);
+		}
+
+	}
+    public Admin() {
+        super();
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.getWriter().append("Served at: ").append(request.getContextPath());
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		PrintWriter out = response.getWriter();	
+
+		response.setContentType("text/html");
+		out.println("<html><body>");
+		try {
+			
+			
+			
+			InputStream in = getServletContext().getResourceAsStream("/WEB-INF/config.properties");
+			Properties props = new Properties();
+			props.load(in);
+			DBConnection conn = new DBConnection(props.getProperty("url"),props.getProperty("username") , props.getProperty("password"));
+			Connection connection = conn.getConnection();
+			
+			if(connection != null) {
+				connection.close();
+			}
+			
+			
+			String command = request.getParameter("command");
+			if(command == null) {
+				command = "CLASSES"; // What ?
+			}
+			
+			if(!getCookie(request, response) && (!command.equals("login"))) {
+				
+				response.sendRedirect("/login.jsp");
+			} else {
+				
+				switch(command) {
+				case"STUDENT":
+					studentList(request,response);
+					break;
+					
+				case"TEACHER":
+					teacherList(request,response);
+					break;
+					
+				case"SUBJECT":
+					subjectList(request,response);
+					break;
+				
+				case"CLASS":
+					classList(request,response);
+					break;
+				
+				case"login":
+					login(request,response);
+					break;			
+				}
+			}
+			
+		} catch(Exception e) {
+			throw new ServletException(e);
+		}
+		
+	}
+	
+
+
+	private void subjectList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		List<Subject> subjects = database.getSubjects();
+		request.setAttribute("Subject_list", subjects);
+		
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/subjects_list.jsp");
+		dispatcher.forward(request, response);
+
+		
+	}
+	
+	private void teacherList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		List<teacher> teachers = database.getTeachers();
+		request.setAttribute("Teacher_lsit", teachers);
+		
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/teacher_list.jsp");
+		dispatcher.forward(request, response);
+		
+	}
+	
+	private void studentList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		List<Student> students = database.getStudents();
+		request.setAttribute("Student_list", students);
+		
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/student_list.jsp");
+		dispatcher.forward(request, response);
+		
+	}
+	
+	private void classList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		List<Class> classes = database.getClasses();
+		request.setAttribute("Class_list", classes);
+		
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/slass_list.jsp");
+		dispatcher.forward(request, response);
+		
+	}
+	
+	private void login(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		String username = request.getParameter("user_name");
+		String password = request.getParameter("password");
+		
+		// username and password is 'admin'
+		
+		if(username.toLowerCase().equals("admin") && password.toLowerCase().equals("admin")) {
+			
+			Cookie cookie = new Cookie(username, password);
+			cookie.setMaxAge(86400);
+			response.addCookie(cookie);
+			classList(request,response); // ?
+		} else {
+			RequestDispatcher dispatcher = request.getRequestDispatcher("login.html");
+			dispatcher.forward(request, response);
+		}
+		
+	}
+	
+
+//	private void classStudentsList(HttpServletRequest request, HttpServletResponse response) throws Exception {
+//
+//		int classId = Integer.parseInt(request.getParameter("classId"));
+//		String section = request.getParameter("section");
+//		String subject = request.getParameter("subject");
+//
+//		// get subjects from db util
+//		List<Student> students = database.loadClassStudens(classId);
+//
+//		// add subjects to the request
+//		request.setAttribute("STUDENTS_LIST", students);
+//		request.setAttribute("SECTION", section);
+//		request.setAttribute("SUBJECT", subject);
+//
+//		// send it to the jSP view page
+//		RequestDispatcher dispatcher = request.getRequestDispatcher("/class-students.jsp");
+//		dispatcher.forward(request, response);
+//
+//	}
+
+	private boolean getCookie(HttpServletRequest request, HttpServletResponse response) {
+		return false;
+	}
+	
+
+}
