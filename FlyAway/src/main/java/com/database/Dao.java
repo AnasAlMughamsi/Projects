@@ -112,10 +112,7 @@ public class Dao {
 	}
 
 	public boolean insertFlight(HashMap<String, String> flight) throws SQLException {
-		// PreparedStatement stm=con.prepareStatement("INSERT INTO 'flyaway.flights'
-		// ('name', 'from', 'to', 'date', 'time', 'price') values(?,?,?,?,?,?)");
-		// String sql="INSERT INTO flights ('name','from','to','date','time','price')
-		// values('"+flight.get("name")+"','"+flight.get("from")+"','"+flight.get("to")+"','"+flight.get("date")+"','"+flight.get("time")+"','"+flight.get("price")+"');";
+
 		String query1 = "INSERT INTO flights (name, fromf, tof, datef, timef, price) VALUES" + " ('"
 				+ StringUtil.fixSqlFieldValue(flight.get("name")) + "'," + " '"
 				+ StringUtil.fixSqlFieldValue(flight.get("from")) + "'," + " '"
@@ -124,15 +121,11 @@ public class Dao {
 				+ StringUtil.fixSqlFieldValue(flight.get("time")) + "'," + " '"
 				+ StringUtil.fixSqlFieldValue(flight.get("price")) + "')";
 
-		// String sql="INSERT INTO `flyaway`.`flights` (`name`, `fromf`, `tof`, `datef`,
-		// `timef`, `price`) VALUES ('indigo', 'hyd', 'viz', '2021-04-08', '10:00',
-		// '2000');";
 		System.out.println(flight.get("date"));
 		System.out.println(flight.get("time"));
-		// String query1="INSERT into flyaway.flights (name,from,to,date,time,price)
-		// values('indigo','hyd','viz','24-02-2022','10:30','2000')";
+
 		try {
-			// stm.execute();
+
 			st.execute(query1);
 			return true;
 		} catch (SQLException e) {

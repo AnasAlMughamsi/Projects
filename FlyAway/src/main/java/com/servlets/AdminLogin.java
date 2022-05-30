@@ -32,7 +32,6 @@ public class AdminLogin extends HttpServlet {
 				response.sendRedirect("AdminPage.jsp");
 			}
 		} catch (ClassNotFoundException | SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
